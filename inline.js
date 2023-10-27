@@ -1,3 +1,5 @@
+window.chrome.embeddedSearch = { newTabPage: {} }
+
 // inline scripts originated in local_ntp.html
 if (window.chrome.embeddedSearch.newTabPage.isIncognito) document.getElementsByTagName('html')[0].style.backgroundColor = 'black';
 
