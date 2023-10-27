@@ -752,7 +752,7 @@ function close_information() {
 
 function create_new_item() {
   preconnectTo('https://logos.kiwibrowser.com');
-  var url = prompt("Enter website address", "http://");
+  var url = prompt("Enter website address", "https://");
   url = url.trim();
   url = url.replace(' ', '.');
   var parser = document.createElement('a');
