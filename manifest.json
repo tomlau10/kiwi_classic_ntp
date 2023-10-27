@@ -8,5 +8,9 @@
   },
   "chrome_url_overrides": {
     "newtab": "/local_ntp.html"
-  }
+  },
+  "host_permissions": [
+    "https://www.google.com/s2/favicon*",
+    "https://*.gstatic.com/favicon*"
+  ]
 }

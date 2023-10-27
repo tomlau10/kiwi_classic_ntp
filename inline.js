@@ -574,8 +574,11 @@ function add_favorite(item) {
     imageUri = loadingImage;
     try {
       fetch('https://logos.kiwibrowser.com/' + rootDomain).then(function (response) {
-        return response.arrayBuffer();
+        return response.ok ? response : fetch(`https://www.google.com/s2/favicons?domain=${item.url}&sz=128`);
       })
+        .then((response) => {
+          return response.ok ? response.arrayBuffer() : new ArrayBuffer();
+        })
         .then(function (answer) {
           localStorage.setItem('icon-' + rootDomain, 'data:image/png;base64,' + arrayBufferToBase64(answer));
           document.getElementById('icon' + randomId).src = 'data:image/png;base64,' + arrayBufferToBase64(answer);
@@ -585,8 +588,11 @@ function add_favorite(item) {
       console.log('Fetch failed for: ' + err.message);
     }
   }
-  innerDiv.innerHTML = '<img id="closeImg" src="' + closeImg + '" class="closeImg closeImgInvisible" height="20" width="20" style="position: absolute; right: 0px; border: 0px;" /><a id="tile_target" href="' + item.url + '"><img border="0" class="grid-image serverIdea" title="' + item.url + '" src="' + imageUri + '" id="icon' + randomId + '" onError="invalidate_image(this)" width="64" style="max-height: 64px; border-radius: 4px;" /><span style="width: 60px; line-height: 15px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; display: inline-block">' + rootDomain + '</span></a>';
+  innerDiv.innerHTML = '<img id="closeImg" src="' + closeImg + '" class="closeImg closeImgInvisible" height="20" width="20" style="position: absolute; right: 0px; border: 0px;" /><a id="tile_target" href="' + item.url + '"><img border="0" class="grid-image serverIdea" title="' + item.url + '" src="' + imageUri + '" id="icon' + randomId + '" width="64" style="max-height: 64px; border-radius: 4px;" /><span style="width: 60px; line-height: 15px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; display: inline-block">' + rootDomain + '</span></a>';
   innerDiv.style.minHeight = '64px';
+  innerDiv.querySelector(`#icon${randomId}`).addEventListener("error", (e) => {
+    invalidate_image(e.target);
+  });
 
   innerDiv.querySelector('#closeImg').addEventListener("touchstart", remove_favorite);
   innerDiv.querySelector('#tile_target').addEventListener("touchstart", process_start);
@@ -951,6 +957,13 @@ else {
         i = keys.length;
       while (i--) {
         localStorage.setItem(keys[i], values[i]);
+      }
+      for (const key in localStorage) {
+        if (localStorage.hasOwnProperty(key)) {
+          if (key.startsWith('cached') || key.startsWith('icon-')) {
+            delete localStorage[key];
+          }
+        }
       }
       document.location.reload();
     };
