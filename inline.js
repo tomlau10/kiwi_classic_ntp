@@ -379,7 +379,7 @@ function render_gnews(answer, start_offset, n) {
     else
       news_time = parseInt(Date.parse(news_time) / 1000);
     if (link)
-      link = link.replace('chrome-search://local-ntp/', 'https://news.google.com/');
+      link = link.replace(chrome.runtime.getURL(""), 'https://news.google.com/');
 
     if (link && image && title) {
       //                  console.log('Title: ' + title);
@@ -847,7 +847,7 @@ if (!window.chrome.embeddedSearch.newTabPage.isIncognito) {
               localStorage.lastOffsetRendered = 0;
               render_news_loading();
             }
-            await fetch('https://news.google.com/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRFZxYUdjU0FtVnVHZ0pWVXlnQVAB' + localStorage.newsLocale, { method: 'GET', credentials: 'omit' })
+            await fetch('https://chromecontentsuggestions-pa.kiwibrowser.com/testnews/?topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRFZxYUdjU0FtVnVHZ0pWVXlnQVAB' + localStorage.newsLocale, { method: 'GET', credentials: 'omit' })
               .then(function (response) {
                 if (response.url.includes("&ceid=")) {
                   //            console.log('Gnews: Detected ceid (standard)');
