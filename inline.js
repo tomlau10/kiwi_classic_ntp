@@ -198,13 +198,18 @@ function add_gnews(is_primary, title, news_time, source, source_logo, link, imag
   var creationTime = news_time;
   var timeagoInstance = timeago();
   innerDiv.className = 'newsItem';
-  innerDiv.innerHTML = '<div style="float: right; height: 128px;"><img src="' + image + '" class="newsImage" onload="this.style.opacity=\'1\';this.style.visibility=\'visible\'" onerror="this.style.visibility=\'hidden\'" /></div>'
+  innerDiv.innerHTML = '<div style="float: right; height: 128px;"><img src="' + image + '" class="newsImage" /></div>'
     + '<div style="position: relative; left: 10px; font-size: medium">'
     + '<span class="newsAttribution"><img src="' + source_logo + '" onerror="this.style.display=\'none\'" style="max-height: 12px;" />&nbsp;&nbsp;<a style="color: #333" href="' + link + '">' + source + '</a></span>'
     + '<div class="newsTitle"><a style="color: #333" href="' + link + '">'
     + title + '</a></div>'
     + '<span class="newsTime">'
     + timeago(creationTime) + '</span></a></div>';
+  innerDiv.querySelector("img.newsImage").addEventListener("load", (e) => {
+    let img = e.target;
+    img.style.opacity = 1;
+    img.style.visibility = 'visible';
+  });
   document.getElementById('news').appendChild(innerDiv);
   var spacer = document.createElement('div');
   spacer.style.clear = 'both';
@@ -680,7 +685,7 @@ function select_locale(locale) {
   localStorage.newsLocale = locales[locale];
   localStorage.removeItem('cachedNewsUpdate');
   localStorage.removeItem('cachedGNews');
-  document.location = 'chrome-search://local-ntp/local-ntp.html';
+  document.location.reload();
 }
 
 function configure_news() {
@@ -690,10 +695,15 @@ function configure_news() {
     if (locale_to_readabletext(localStorage.newsLocale) == locale)
       buf += '<li class="localesListSelected"><b>' + locale + '</b></li>';
     else
-      buf += '<li class="localesListUnselected"><a href="#" onClick="javascript:select_locale(\'' + locale + '\'); return false">' + locale + '</a></li>';
+      buf += '<li class="localesListUnselected"><a href="#">' + locale + '</a></li>';
   }
   buf += '</ul>';
   document.getElementById("localeDropdown").innerHTML = buf;
+  [...document.querySelectorAll("li.localesListUnselected>a")].forEach((a) => {
+    a.addEventListener("click", () => {
+      select_locale(a.innerHTML);
+    });
+  });
 }
 
 window.onclick = function (event) {
