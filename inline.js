@@ -136,6 +136,7 @@ function instant_grid() {
     replaceInnerHTML(document.getElementById('fake-bookmarks-grid'), localStorage.cachedGrid);
     document.getElementById('fake-bookmarks-grid').style.cssText = localStorage.cachedGridStyle;
     document.getElementById('fake-bookmarks-grid').style.display = 'block';
+    document.getElementById('add-button-spacer').style.display = 'none';
   }
 }
 
@@ -634,6 +635,7 @@ function add_to_storage(el) {
 function swap_if_ready() {
   if (bookmarksGrid.style.cssText.includes("height")) {
     document.getElementById('fake-bookmarks-grid').style.display = 'none';
+    document.getElementById('add-button-spacer').style.display = 'none';
     bookmarksGrid.classList.remove("full-hidden");
   }
 }
