@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Kiwi Browser Classic NTP Fixed",
+  "version": "0.0.1",
+  "description": "The Classic NTP from Kiwi Browser with gnews API CORS issues fixed",
+  "icons": {
+    "128": "icon128.png"
+  },
+  "chrome_url_overrides": {
+    "newtab": "/local_ntp.html"
+  }
+}
