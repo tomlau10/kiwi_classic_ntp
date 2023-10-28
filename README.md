@@ -1,3 +1,23 @@
+# Intro
+As a long-time user of Kiwi Browser, I have always preferred the classic new tab page (ntp) homepage over the modern one. Recently, however, I encountered issues with the gnews section due to some CORS problems. Originally I wanted to simply patch it using a tampermonkey script, but no... unfortunately it cannot override pages with `chrome-search://*` :(
+
+After researching possible solutions, I found that the only way to override the ntp and fix the issue is using a **Chrome extension**. While there are many ntp extensions available, I decided to create an extension based on the classic version that I love :)
+
+## Major patches
+- Updated code to the latest version from [kiwibrowser/src.next](https://github.com/kiwibrowser/src.next)
+- Converted into a Chrome extension
+- Used Kiwi Browser's proxied gnews API to bypass CORS issues
+- Added Google's favicon API as fallback (`logos.kiwibrowser.com` has some nice high-res favicons, such as [GitHub](https://logos.kiwibrowser.com/github.com), that Google's API doesn't have... so I decided to keep Kiwi Browser's as the primary API)
+
+## How to use
+1. Download this repository as a zip file
+1. Go to Kiwi Browser's extension settings and enable Developer Mode
+1. Add the extension through the zip file
+1. Change the homepage setting to **modern** (or set to **custom** with `chrome://newtab`)
+
+---
+# Original README
+
 Copyright 2019 Geometry OU / Kiwi Browser
 
 Licensed under https://creativecommons.org/licenses/by-nc-sa/4.0/
