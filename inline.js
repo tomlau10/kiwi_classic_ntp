@@ -199,7 +199,7 @@ function add_gnews(is_primary, title, news_time, source, source_logo, link, imag
   var creationTime = news_time;
   var timeagoInstance = timeago();
   innerDiv.className = 'newsItem';
-  innerDiv.innerHTML = '<div style="float: right; height: 128px;"><img src="' + image + '" class="newsImage" /></div>'
+  innerDiv.innerHTML = '<div style="float: right; height: 128px;"><img crossorigin="anonymous" src="' + image + '" class="newsImage" /></div>'
     + '<div style="position: relative; left: 10px; font-size: medium">'
     + '<span class="newsAttribution"><img src="' + source_logo + '" onerror="this.style.display=\'none\'" style="max-height: 12px;" />&nbsp;&nbsp;<a style="color: #333" href="' + link + '">' + source + '</a></span>'
     + '<div class="newsTitle"><a style="color: #333" href="' + link + '">'
@@ -386,6 +386,8 @@ function render_gnews(answer, start_offset, n) {
       news_time = parseInt(Date.parse(news_time) / 1000);
     if (link)
       link = link.replace(chrome.runtime.getURL(""), 'https://news.google.com/');
+    if (image)
+      image = image.replace(chrome.runtime.getURL(""), 'https://news.google.com/');
 
     if (link && image && title) {
       //                  console.log('Title: ' + title);
@@ -854,6 +856,7 @@ if (!window.chrome.embeddedSearch.newTabPage.isIncognito) {
             });
         } catch (err) {
           console.log('Fetch news failed for: ' + err.message);
+          has_valid_foryou_entries = false;
         }
 
         console.log("Processing standard news feed");
