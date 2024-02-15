@@ -220,176 +220,78 @@ function add_gnews(is_primary, title, news_time, source, source_logo, link, imag
 var has_valid_foryou_entries = false;
 var last_offset_rendered = 0;
 function render_gnews(answer, start_offset, n) {
-  last_offset_rendered = start_offset + n;
   if (must_clear_news) {
     must_clear_news = false;
     document.getElementById('news').innerHTML = '';
   }
-  var el = document.createElement('div');
-  el.style.display = 'none';
-  el.baseURI = 'https://news.google.com/';
-  simplifiedAnswer = '<article' + answer.split('<article').slice(1).join('<article').split('<\/script>')[0];
-  simplifiedAnswer = simplifiedAnswer.replace(new RegExp('<img', 'gi'), '<source');
-  simplifiedAnswer = simplifiedAnswer.replace(/ (aria-.*?|js.*?|srcset|d|data-.*?|focusable|fill|ve-.*?|alt|tabindex|role|loading)="[^"]*"/g, '')
-  el.innerHTML = simplifiedAnswer;
-  localStorage.cachedGNews = simplifiedAnswer;
-  var articles = el.getElementsByTagName('article');
+  let parser = new DOMParser();
+  const doc = parser.parseFromString(answer, 'text/html');
+  const articles = doc.querySelectorAll('article');
   //          console.log(articles);
-  var added = start_offset;
-  for (var i = start_offset; i < articles.length && added < (n + start_offset); i++) {
-    var article = articles[i];
-    var children = article.childNodes;
-    var title = null;
-    var link = null;
-    var image = null;
-    var source = null;
-    var source_logo = null;
+  var added = 0;
+  for (var i = start_offset; i < articles.length && added < n; i++, last_offset_rendered++) {
+    var item = articles[i];
+
+    // Extracting the link
+    const oldLinkElement = item.querySelector('a[href^="./article"]');
+    const newLinkElement = item.querySelector('a.WwrzSb');
+    const linkElement = oldLinkElement || newLinkElement;
+    const link = linkElement ? linkElement.href.replace('./', 'https://news.google.com/').replace(chrome.runtime.getURL(""), 'https://news.google.com/') : false;
+
+    // Extracting the image
+    const oldImageElement = item.querySelector('figure img');
+    const newImageElement = item.querySelector('div.oovtQ img.qEdqNd');
+    const imageElement = oldImageElement || newImageElement;
+    const image = imageElement ? imageElement.src.replace(chrome.runtime.getURL(""), 'https://news.google.com/') : false;
+
+    // Extracting title
+    const oldTitleElement = item.querySelector('h4');
+    const newTitleElement = item.querySelector('h4.gPFEn') || item.querySelector('a.gPFEn');
+    const titleElement = oldTitleElement || newTitleElement;
+    const title = titleElement ? titleElement.innerText : false;
+
+    // Extracting source name
+    const oldSourceElement = item.querySelector('div.wsLqz');
+    const newSourceElement = item.querySelector('div.vr1PYe');
+    const sourceElement = oldSourceElement || newSourceElement;
+    const sourceName = sourceElement ? sourceElement.innerText : false;
+    const source = sourceName;
+
+    // Extracting source image
+    const oldSourceImageElement = item.querySelector('div.wsLqz > img');
+    const newSourceImageElement = item.querySelector('div.oovtQ img.qEdqNd');
+    const sourceImageElement = oldSourceImageElement || newSourceImageElement;
+    const sourceImage = sourceImageElement ? sourceImageElement.src : false;
+    const source_image = sourceImage;
+
+    // Extracting time and datetime
+    const timeElement = item.querySelector('time');
+    const timeText = timeElement ? timeElement.innerText : false;
+    const time = timeText;
+    const datetimeText = timeElement ? timeElement.getAttribute('datetime') : false;
+    const datetime = datetimeText;
+
     var is_primary = false;
-    var news_time = null;
-    for (var j = 0; j < children.length; j++) {
-      var child = children[j];
-      if (child.tagName == 'A') {
-        link = child.href;
-      }
-      else if (child.tagName == 'FIGURE') {
-        if (child.childNodes.length >= 2 && child.childNodes[0].tagName == 'SOURCE') {
-          image = child.childNodes[0].src;
-          is_primary = true;
-        }
-        else if (child.childNodes.length >= 2 && child.childNodes[1].tagName == 'SOURCE') // video to play
-        {
-          image = child.childNodes[1].src;
-          is_primary = true;
-        }
-        else if (child.childNodes.length == 1 && child.childNodes[0].tagName == 'SOURCE') {
-          image = child.childNodes[0].src;
-        }
-      }
-      else if (child.tagName == 'H3') {
-        title = child.childNodes[0].innerText;
-      }
-      else if (child.tagName == 'DIV') {
-        if (child.childNodes.length >= 2 && child.childNodes[0].tagName == 'DIV' && child.childNodes[1].tagName == 'MENU') {
-          if (child.childNodes[0].childNodes[0].tagName == 'TIME')
-            news_time = child.childNodes[0].childNodes[0].dateTime;
-          else if (child.childNodes[0].childNodes[1].tagName == 'TIME')
-            news_time = child.childNodes[0].childNodes[1].dateTime;
-          if (child.childNodes[0].childNodes.length == 3 && child.childNodes[0].childNodes[2].tagName == 'TIME')
-            news_time = child.childNodes[0].childNodes[2].dateTime;
-        }
-        else if (child.childNodes.length >= 2 && child.childNodes[0].tagName == 'DIV') {
-          var subNode = child.childNodes[1];
-          if (subNode.childNodes[0].tagName == 'DIV' && subNode.childNodes[1].tagName == 'MENU') {
-            if (subNode.childNodes[0].tagName == 'DIV' && subNode.childNodes[1].tagName == 'MENU') {
-              if (subNode.childNodes[0].childNodes[0].tagName == 'TIME')
-                news_time = subNode.childNodes[0].childNodes[0].dateTime;
-              else if (subNode.childNodes[0].childNodes[1].tagName == 'TIME')
-                news_time = subNode.childNodes[0].childNodes[1].dateTime;
-            }
-          }
-          var subNode = child.childNodes[0].childNodes[0];
-          if (subNode.childNodes.length == 3 && subNode.childNodes[0].tagName == 'DIV') {
-            source = subNode.childNodes[0].innerText;
-            var sourceNode = subNode.childNodes[0].childNodes[0];
-            if ((sourceNode.tagName == 'A' || sourceNode.tagName == 'SPAN') && sourceNode.childNodes[0].tagName == 'SOURCE')
-              source_logo = sourceNode.childNodes[0].src;
-          }
-          if (subNode.childNodes.length == 3 && subNode.childNodes[1].tagName == 'H4')
-            title = subNode.childNodes[1].innerText;
-        }
-        else if (child.childNodes.length >= 2 && child.childNodes[0].tagName == 'FIGURE') {
-          if (child.childNodes[0].childNodes[0].tagName == 'SOURCE')
-            image = child.childNodes[0].childNodes[0].src;
-          else if (child.childNodes[0].childNodes[1].tagName == 'SOURCE') // video to play
-            image = child.childNodes[0].childNodes[1].src;
-          var divSubNode = child.childNodes[1];
-          if (divSubNode.childNodes.length == 3 && divSubNode.childNodes[0].tagName == 'DIV') {
-            source = divSubNode.childNodes[0].innerText;
-            var sourceNode = divSubNode.childNodes[0].childNodes[0];
-            if ((sourceNode.tagName == 'A' || sourceNode.tagName == 'SPAN') && sourceNode.childNodes[0].tagName == 'SOURCE')
-              source_logo = sourceNode.childNodes[0].src;
-          }
-          if (divSubNode.childNodes.length == 3 && divSubNode.childNodes[1].tagName == 'H4')
-            title = divSubNode.childNodes[1].innerText;
-        } else if (child.childNodes.length >= 2 && child.childNodes[0].tagName == 'SOURCE') {
-          if (child.childNodes[0].tagName == 'SOURCE' && child.childNodes[1].tagName == 'A') {
-            source_logo = child.childNodes[0].src;
-            if (child.childNodes[1].innerText)
-              source = child.childNodes[1].innerText;
-          }
-          if (child.childNodes.length == 3) {
-            if (child.childNodes[0].tagName == 'SOURCE' && child.childNodes[1].tagName == 'SOURCE' && child.childNodes[2].tagName == 'A') {
-              source_logo = child.childNodes[0].src;
-              if (child.childNodes[2].innerText)
-                source = child.childNodes[2].innerText;
-            }
-          }
-          if (child.childNodes.length == 4) {
-            if (child.childNodes[0].tagName == 'SOURCE' && child.childNodes[1].tagName == 'SOURCE'
-              && child.childNodes[2].tagName == 'SOURCE' && child.childNodes[3].tagName == 'A') {
-              source_logo = child.childNodes[0].src;
-              if (child.childNodes[3].innerText)
-                source = child.childNodes[3].innerText;
-            }
-          }
-        } else if (child.childNodes.length == 1 && child.childNodes[0].tagName == 'A') {
-          subNode = child.childNodes[0];
-          source = subNode.innerText;
-          var sourceNode = subNode.childNodes[0];
-          if (sourceNode.tagName == 'SOURCE')
-            source_logo = sourceNode.src;
-        }
-        else if (child.childNodes.length >= 2 && child.childNodes[0].tagName == 'A') {
-          source = child.childNodes[1].innerText;
-          var sourceNode = child.childNodes[0].childNodes[0];
-          if (sourceNode.tagName == 'SOURCE')
-            source_logo = sourceNode.src;
-        }
-        else if (child.childNodes.length >= 2 && child.childNodes[0].tagName == 'SPAN') {
-          source = child.childNodes[1].innerText;
-          var sourceNode = child.childNodes[0].childNodes[0];
-          if (sourceNode.tagName == 'SOURCE')
-            source_logo = sourceNode.src;
-        } else if (child.childNodes.length >= 2 && child.childNodes[0].tagName == 'SOURCE') {
-          if (child.childNodes[1].innerText)
-            source = child.childNodes[1].innerText;
-        }
-      }
-    }
-    try {
-      if (link == null)
-        link = article.querySelector("a.VDXfz").href;
-    } catch { }
-    try {
-      if (title == null)
-        title = article.querySelector("h4 a.DY5T1d").textContent;
-    } catch { }
-    try {
-      if (image == null)
-        image = article.querySelector(".QwxBBf").src;
-    } catch { }
-    try {
-      if (source == null)
-        source = article.querySelector("a.wEwyrc").textContent;
-    } catch { }
-    try {
-      if (source_logo == null)
-        source_logo = article.querySelector(".wsLqz source").src;
-    } catch { }
-    try {
-      if (news_time == null || news_time == 0)
-        news_time = article.querySelector(".WW6dff").getAttribute("datetime");
-    } catch { }
-    if (news_time && parseInt(news_time.substr(news_time.lastIndexOf(":") + 2)) > 1518000000)
-      news_time = parseInt(news_time.substr(news_time.lastIndexOf(":") + 2));
-    else
-      news_time = parseInt(Date.parse(news_time) / 1000);
-    if (link)
-      link = link.replace(chrome.runtime.getURL(""), 'https://news.google.com/');
     if (image)
-      image = image.replace(chrome.runtime.getURL(""), 'https://news.google.com/');
+      is_primary = true;
 
     if (link && image && title) {
+      // Constructing the mainArticle object
+      const mainArticle = {
+          "title": title,
+          "link": link,
+          "image": image,
+          "source": sourceName,
+          "source_image": sourceImage,
+          "time": timeText,
+          "datetime": datetimeText,
+          "related": []
+      };
+      console.log(mainArticle);
+      var publication_time = new Date(datetime);
+      var news_time = Math.floor(publication_time.getTime() / 1000);
+      var source_logo = source_image;
+
       //                  console.log('Title: ' + title);
       add_gnews(is_primary, title, news_time, source, source_logo, link, image);
       added++;
@@ -397,7 +299,7 @@ function render_gnews(answer, start_offset, n) {
       localStorage.needFetch = false;
     }
   }
-  if (articles.length > (i + 1) && i <= 29) {
+  if (articles.length > (i + 1) && document.getElementById('news').childElementCount <= 29) {
     document.getElementById('newsMore').innerHTML = '<div style="color: #8AB4F8; font-size: 24px; width: 100%; text-align: center"><b>...</b></div><br />&nbsp;<br />';
   } else {
     document.getElementById('newsMore').innerHTML = '';
@@ -811,8 +713,10 @@ async function render_news_async() {
       //    console.log('Rendering GNews from cache');
       render_gnews(localStorage.cachedGNews, 0, 10);
       if (typeof localStorage.lastOffsetRendered != "undefined") {
-        for (var i = 10; i <= localStorage.lastOffsetRendered; i += 10)
-          render_gnews(localStorage.cachedGNews, i, 10);
+        window.setTimeout(() => {
+          while (last_offset_rendered <= localStorage.lastOffsetRendered)
+            render_gnews(localStorage.cachedGNews, last_offset_rendered, 10);
+        }, 1);
       }
     }
   }
@@ -868,7 +772,7 @@ if (!window.chrome.embeddedSearch.newTabPage.isIncognito) {
               localStorage.lastOffsetRendered = 0;
               render_news_loading();
             }
-            await fetch('https://chromecontentsuggestions-pa.kiwibrowser.com/testnews/?topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRFZxYUdjU0FtVnVHZ0pWVXlnQVAB' + localStorage.newsLocale, { method: 'GET', credentials: 'omit' })
+            await fetch('https://news.google.com/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRFZxYUdjU0FtVnVHZ0pWVXlnQVAB' + localStorage.newsLocale, { method: 'GET', credentials: 'omit' })
               .then(function (response) {
                 if (response.url.includes("&ceid=")) {
                   //            console.log('Gnews: Detected ceid (standard)');
