@@ -544,7 +544,7 @@ function swap_if_ready() {
   }
 }
 
-function fetch_tiles_from_most_visited() {
+async function fetch_tiles_from_most_visited() {
   if (window.chrome.embeddedSearch.newTabPage.isIncognito) {
     localStorage.triedToLoadMostVisited = 99999;
     return;
@@ -559,13 +559,13 @@ function fetch_tiles_from_most_visited() {
     else
       console.log(" last update is out of date");
     if (typeof localStorage.useCustomTiles == "undefined" || localStorage.useCustomTiles == "false") {
-      if (chrome.embeddedSearch.newTabPage.mostVisitedAvailable) {
+      if (chrome.topSites) {
         localStorage.storedItems = JSON.stringify([]);
-        var pages = chrome.embeddedSearch.newTabPage.mostVisited;
+        var pages = await chrome.topSites.get();
         var storedItems = JSON.parse(localStorage.storedItems);
         for (var i = 0; i < Math.min(8, pages.length); ++i) {
           offset = storedItems.length;
-          storedItems[offset] = { url: chrome.embeddedSearch.newTabPage.getMostVisitedItemData(pages[i].rid).url }
+          storedItems[offset] = { url: pages[i].url };
           add_favorite(storedItems[offset]);
         }
         localStorage.storedItems = JSON.stringify(storedItems);

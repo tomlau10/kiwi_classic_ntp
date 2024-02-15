@@ -9,6 +9,9 @@
   "chrome_url_overrides": {
     "newtab": "/local_ntp.html"
   },
+  "permissions": [
+    "topSites"
+  ],
   "host_permissions": [
     "https://www.google.com/s2/favicon*",
     "https://*.gstatic.com/favicon*",
