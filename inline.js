@@ -641,6 +641,7 @@ function close_explore() {
 
 function close_news() {
   localStorage.hideNews = true;
+  localStorage.removeItem("lastOffsetRendered");
   document.getElementById('news').style.display = 'none';
   document.getElementById('newsMore').style.display = 'none';
   document.getElementById('configure-button').style.display = 'none';
