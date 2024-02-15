@@ -713,8 +713,10 @@ async function render_news_async() {
       //    console.log('Rendering GNews from cache');
       render_gnews(localStorage.cachedGNews, 0, 10);
       if (typeof localStorage.lastOffsetRendered != "undefined") {
-        while (last_offset_rendered <= localStorage.lastOffsetRendered)
-          render_gnews(localStorage.cachedGNews, last_offset_rendered, 10);
+        window.setTimeout(() => {
+          while (last_offset_rendered <= localStorage.lastOffsetRendered)
+            render_gnews(localStorage.cachedGNews, last_offset_rendered, 10);
+        }, 1);
       }
     }
   }
