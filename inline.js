@@ -306,6 +306,13 @@ function render_gnews(answer, start_offset, n) {
   }
 }
 
+function simplify_answer(answer) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(answer, 'text/html');
+  const articles = doc.querySelectorAll('article');
+  return [...articles].map((article) => article.outerHTML).join();
+}
+
 var closeImg = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAMAAAD04JH5AAAAA3NCSVQICAjb4U/gAAAACXBIWXMAACNvAAAjbwE1/Af7AAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAANVQTFRF////11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK11pK2F9P2WBR2WJT2mVW33pt5ZSJ5peN6J+V6KGY/PHv/PHw/PPy/PTz/fb1////fP+U/wAAADd0Uk5TAAEDBAYLDA4VHB4fNDg8PUJDR0pbc3yCg4SGiImVlqWnq661uLq/wsPFy9DT2d7m6+zt8/n6/uYUS2MAAANwSURBVHjazVvnWiJBEBwjBjwRCSfgkWHJectAUnTf/5FuDeehIhN3euv3fFu1aaa7upsxFUSiiXS+7LS6/fG432055Xw6EY0wKziI52o9bESvlosfBEq+H7tqTLAVk8bv2H5A9GfXQwhheH1mnv001YEEOqlTo/TRkgtJuKWoMfrzCpRQOTdCf1GHMuoX2vTHRWiheKxFv5ccQROj5J46/682DKD9S5F+N+PCCNzMrtLbd2AMjsKXcDmAQQwuJel3si6Mws3uSJ06BRhHQeKMOqwiAFQPRfmPmggEzSMx/pMOAkLnROj+A+P3FQg8g8MmAkST+x3sVxEoqpx/YaeAgFHYvh9kETiyW/dfN3gB7pZd+XgACxj8eDLtOrAC56fTOQNLyPwQ/7i2BLgbY6S9NqyhvSlOTMIikhv+gJFNAaPvf0IRVlH8lv/AMr7mTHXbAupf8k9Yx+fMtWJfQOVT/g8CrPsHJe7q28XsRvzad8v5PXdRac1/4W7C9yvPe5iK8k8fPW91y92Q/7s4Ke4l556PJ0EF06eX1QvuutSHAH4cvPTEFbzxezN+jPzhvwm81EdhBe/8DwKfzD8371r8tvgKhBf6+PMeiQ9hToEMP4ZvMXpM5tPiXFqKH4i9CriCMQWS/Lh6FdCAKQWy/Gi8+u8TGFIgzY/Ji7sfl9i+t1LI8wNxX0AOZhSo8CPnC6jBiAIlftR8AT2YUKDGjx5jEdljfCOVIj8QUYhFNpAp8/tRSQL6CtT5kWBpaCvQ4Eea5aGrQIcfeVaGpgItfpSZoinxQavHD4e1oKXg+VmLHy3WhZ4CPX50WR/6CtT50Wdj9dRm+vb4vWd1fozpBZC/AvKPkPw3JN+IyLdi8sOI/DgmD0jIQzLyoJQ8LKdPTMhTM/LklDw9Jzco6C0acpOK3KYjNypFrNqbB1mr9vGOv/RM3KyeyZvVS+7CjoRdv5C36+fcdSmJgsXtyn+o4gUL/4WtuCWTtYKFQMnmfr68E97gcDNbcAsm6yUb+qIVedmOvnBJXrqlL16Tl+/pGxjIWzjom1jI23joG5noW7nIm9no2/noGxrpWzrJm1rp23rpG5vpW7vpm9vp2/vpBxzoRzzoh1xCMOZDP+hEP+oVgmE3+nG/EAw8hmDkMwRDryEY+w3B4HMYRr9DMPwexPj/X+Yt8H/u7e31AAAAAElFTkSuQmCC';
 document.getElementById('add-button').addEventListener('click', create_new_item);
 
@@ -752,6 +759,7 @@ if (!window.chrome.embeddedSearch.newTabPage.isIncognito) {
               has_valid_foryou_entries = true;
               return response.text();
             })
+            .then(simplify_answer)
             .then(function (answer) {
               if (answer != localStorage.cachedGNews && !news_are_already_onscreen) {
                 render_gnews(answer, 0, 10);
@@ -782,6 +790,7 @@ if (!window.chrome.embeddedSearch.newTabPage.isIncognito) {
                 }
                 return response.text();
               })
+              .then(simplify_answer)
               .then(function (answer) {
                 //          console.log('Gnews: received answer from standard feed');
                 if (answer != localStorage.cachedGNews && !news_are_already_onscreen) {
