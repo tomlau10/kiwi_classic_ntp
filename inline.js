@@ -201,7 +201,7 @@ function add_gnews(is_primary, title, news_time, source, source_logo, link, imag
   innerDiv.className = 'newsItem';
   innerDiv.innerHTML = '<div style="float: right; height: 128px;"><img crossorigin="anonymous" src="' + image + '" class="newsImage" /></div>'
     + '<div style="position: relative; left: 10px; font-size: medium">'
-    + '<span class="newsAttribution"><img src="' + source_logo + '" onerror="this.style.display=\'none\'" style="max-height: 12px;" />&nbsp;&nbsp;<a style="color: #333" href="' + link + '">' + source + '</a></span>'
+    + '<span class="newsAttribution"><img src="' + source_logo + '" style="max-height: 12px;" />&nbsp;&nbsp;<a style="color: #333" href="' + link + '">' + source + '</a></span>'
     + '<div class="newsTitle"><a style="color: #333" href="' + link + '">'
     + title + '</a></div>'
     + '<span class="newsTime">'
@@ -210,6 +210,11 @@ function add_gnews(is_primary, title, news_time, source, source_logo, link, imag
     let img = e.target;
     img.style.opacity = 1;
     img.style.visibility = 'visible';
+  });
+  innerDiv.querySelector("span.newsAttribution > img").addEventListener("error", (e) => {
+    let img = e.target;
+    img.style.display = "none";
+    img.nextSibling.remove();   // remove the separating spaces
   });
   document.getElementById('news').appendChild(innerDiv);
   var spacer = document.createElement('div');
