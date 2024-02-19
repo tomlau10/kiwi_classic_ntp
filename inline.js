@@ -768,8 +768,13 @@ if (!window.chrome.embeddedSearch.newTabPage.isIncognito) {
             .then(simplify_answer)
             .then(function (answer) {
               //          console.log('Gnews: received answer from standard feed');
-              if (answer != localStorage.cachedGNews && !news_are_already_onscreen) {
-                render_gnews(answer, 0, 10);
+              if (answer != localStorage.cachedGNews) {
+                if (!news_are_already_onscreen) {
+                  render_gnews(answer, 0, 10);
+                } else {
+                  // remove load more news to prevent mixing with existing old news
+                  document.getElementById("newsMore").style.display = "none";
+                }
               }
               localStorage.cachedGNews = answer;
               localStorage.cachedNewsUpdate = (Date.now() / 1000);
