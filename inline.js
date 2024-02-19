@@ -222,7 +222,6 @@ function add_gnews(is_primary, title, news_time, source, source_logo, link, imag
   innerDiv.appendChild(spacer);
 }
 
-var has_valid_foryou_entries = false;
 var last_offset_rendered = 0;
 function render_gnews(answer, start_offset, n) {
   if (must_clear_news) {
@@ -740,7 +739,6 @@ if (!window.chrome.embeddedSearch.newTabPage.isIncognito) {
   if ((typeof localStorage.cachedNewsUpdate == "undefined") || ((Date.now() / 1000) - localStorage.cachedNewsUpdate) > 3000 || (typeof localStorage.needFetch == "undefined")) {
     if (typeof localStorage.hideNews == "undefined") {
 
-      has_valid_foryou_entries = false;
       if (news_are_already_onscreen) {
         localStorage.needFetch = false;
       } else {
@@ -751,60 +749,31 @@ if (!window.chrome.embeddedSearch.newTabPage.isIncognito) {
       }
 
       async function get_news() {
+        console.log("Processing standard news feed");
         try {
-          await fetch('https://news.google.com/foryou' + localStorage.newsLocale, { method: 'GET', credentials: 'include' })
+          if (!news_are_already_onscreen) {
+            last_offset_rendered = 0;
+            localStorage.lastOffsetRendered = 0;
+            render_news_loading();
+          }
+          await fetch('https://news.google.com/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRFZxYUdjU0FtVnVHZ0pWVXlnQVAB' + localStorage.newsLocale, { method: 'GET', credentials: 'omit' })
             .then(function (response) {
-              //          console.log('Gnews: received answer from personalized feed');
               if (response.url.includes("&ceid=")) {
-                //            console.log('Gnews: Detected ceid (personalized)');
+                //            console.log('Gnews: Detected ceid (standard)');
                 localStorage.newsLocale = response.url.substr(response.url.lastIndexOf('?'));
                 document.getElementById('locale').innerHTML = locale_to_readabletext(localStorage.newsLocale);
               }
-              console.log("We set has_valid_foryou_entries to true");
-              has_valid_foryou_entries = true;
               return response.text();
             })
             .then(simplify_answer)
             .then(function (answer) {
+              //          console.log('Gnews: received answer from standard feed');
               if (answer != localStorage.cachedGNews && !news_are_already_onscreen) {
                 render_gnews(answer, 0, 10);
               }
               localStorage.cachedGNews = answer;
               localStorage.cachedNewsUpdate = (Date.now() / 1000);
             });
-        } catch (err) {
-          console.log('Fetch news failed for: ' + err.message);
-          has_valid_foryou_entries = false;
-        }
-
-        console.log("Processing standard news feed");
-        console.log(has_valid_foryou_entries);
-        try {
-          if (!has_valid_foryou_entries) {
-            if (!news_are_already_onscreen) {
-              last_offset_rendered = 0;
-              localStorage.lastOffsetRendered = 0;
-              render_news_loading();
-            }
-            await fetch('https://news.google.com/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRFZxYUdjU0FtVnVHZ0pWVXlnQVAB' + localStorage.newsLocale, { method: 'GET', credentials: 'omit' })
-              .then(function (response) {
-                if (response.url.includes("&ceid=")) {
-                  //            console.log('Gnews: Detected ceid (standard)');
-                  localStorage.newsLocale = response.url.substr(response.url.lastIndexOf('?'));
-                  document.getElementById('locale').innerHTML = locale_to_readabletext(localStorage.newsLocale);
-                }
-                return response.text();
-              })
-              .then(simplify_answer)
-              .then(function (answer) {
-                //          console.log('Gnews: received answer from standard feed');
-                if (answer != localStorage.cachedGNews && !news_are_already_onscreen) {
-                  render_gnews(answer, 0, 10);
-                }
-                localStorage.cachedGNews = answer;
-                localStorage.cachedNewsUpdate = (Date.now() / 1000);
-              });
-          }
         } catch (err) {
           console.log('Fetch generic news failed for: ' + err.message);
         }
