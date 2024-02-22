@@ -15,7 +15,6 @@
   "host_permissions": [
     "https://www.google.com/s2/favicon*",
     "https://*.gstatic.com/favicon*",
-    "https://news.google.com/api/attachments/*",
-    "https://img.youtube.com/*"
+    "https://news.google.com/api/attachments/*"
   ]
 }

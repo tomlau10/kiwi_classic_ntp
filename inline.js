@@ -246,7 +246,7 @@ function render_gnews(answer, start_offset, n) {
     const oldImageElement = item.querySelector('figure img');
     const newImageElement = item.querySelector('div.oovtQ img.qEdqNd');
     const imageElement = oldImageElement || newImageElement;
-    const image = imageElement ? imageElement.src.replace(chrome.runtime.getURL(""), 'https://news.google.com/') : false;
+    const image = imageElement && !imageElement.src.includes("youtube") ? imageElement.src.replace(chrome.runtime.getURL(""), 'https://news.google.com/') : false;
 
     // Extracting title
     const oldTitleElement = item.querySelector('h4');
