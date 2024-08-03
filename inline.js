@@ -237,7 +237,7 @@ function render_gnews(answer, start_offset, n) {
     var item = articles[i];
 
     // Extracting the link
-    const oldLinkElement = item.querySelector('a[href^="./article"]');
+    const oldLinkElement = item.querySelector('a[href^="./article"], a[href^="./read"]');
     const newLinkElement = item.querySelector('a.WwrzSb');
     const linkElement = oldLinkElement || newLinkElement;
     const link = linkElement ? linkElement.href.replace('./', 'https://news.google.com/').replace(chrome.runtime.getURL(""), 'https://news.google.com/') : false;
