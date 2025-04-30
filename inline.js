@@ -256,14 +256,14 @@ function render_gnews(answer, start_offset, n) {
 
     // Extracting source name
     const oldSourceElement = item.querySelector('div.wsLqz');
-    const newSourceElement = item.querySelector('div.vr1PYe');
+    const newSourceElement = item.querySelector('div.vr1PYe') || item.querySelector('a.wEwyrc');
     const sourceElement = oldSourceElement || newSourceElement;
     const sourceName = sourceElement ? sourceElement.innerText : false;
     const source = sourceName;
 
     // Extracting source image
     const oldSourceImageElement = item.querySelector('div.wsLqz > img');
-    const newSourceImageElement = item.querySelector('div.oovtQ img.qEdqNd');
+    const newSourceImageElement = item.querySelector('div.oovtQ img.qEdqNd') || item.querySelector('div.SVJrMe > img');
     const sourceImageElement = oldSourceImageElement || newSourceImageElement;
     const sourceImage = sourceImageElement ? sourceImageElement.src : false;
     const source_image = sourceImage;
