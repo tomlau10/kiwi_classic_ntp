@@ -308,6 +308,7 @@ function render_gnews(answer, start_offset, n) {
   } else {
     document.getElementById('newsMore').innerHTML = '';
   }
+  return added > 0;
 }
 
 function simplify_answer(answer) {
@@ -727,7 +728,9 @@ async function render_news_async() {
       if (typeof localStorage.lastOffsetRendered != "undefined") {
         window.setTimeout(() => {
           while (last_offset_rendered <= localStorage.lastOffsetRendered)
-            render_gnews(localStorage.cachedGNews, last_offset_rendered, 10);
+            if (!render_gnews(localStorage.cachedGNews, last_offset_rendered, 10)) {
+              break;
+            }
         }, 1);
       }
     }
